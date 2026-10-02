@@ -1,14 +1,16 @@
 import type { Building } from "../types/Building";
 
 export const createDefaultBuilding = (overrides: Partial<Building> = {}): Building => ({
-  id: 1 as never,
-  name: "name 1" as never,
-  campus: "campus 1" as never,
-  floor_count: "floor count 1" as never,
-  fire_grade: "fire grade 1" as never,
-  manager_id: 1 as never,
-  address_code: "address code 1" as never,
-  ...overrides
+  id: 0,
+  name: "",
+  campus: "",
+  floor_count: 1,
+  fire_grade: "一级",
+  manager_id: 4,
+  address_code: "",
+  compliance_rate: 0,
+  qualified_devices: 0,
+  ...overrides,
 });
 
 export const createBuildingForm = createDefaultBuilding;

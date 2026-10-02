@@ -1,6 +1,15 @@
 export const ERROR_MESSAGES = {
   AUTH_REQUIRED: "请先登录后再继续操作",
-  RBAC_DENIED: "当前角色没有执行该动作的权限",
+  AUTH_INVALID: "登录已过期，请重新登录",
+  RBAC_DENIED: "当前角色没有执行该动作的权限（审计员仅可查看）",
+  PROXY_FILL_DENIED: "代巡检员补录已被拒绝：只能提交本人任务的检查结果",
   VALIDATION_FAILED: "表单字段缺失或格式错误",
-  RATE_LIMITED: "请求过于频繁，请稍后再试"
-};
+  NOT_FOUND: "目标记录不存在",
+  TASK_NOT_OWNED: "该巡检任务不属于当前巡检员",
+  TASK_NOT_OPEN: "任务已提交/复核，不能再修改检查项",
+  TICKET_CLOSED_CONFLICT: "隐患整改单已关闭，旧记录未覆盖现场，冲突项待复核",
+  STALE_VERSION: "数据版本已过期，请刷新后重试",
+  RATE_LIMITED: "请求过于频繁，请稍后再试",
+  INTERNAL_ERROR: "服务内部错误",
+  OFFLINE_QUEUED: "当前离线，结果已保存在本机，联网后自动合并",
+} as const;

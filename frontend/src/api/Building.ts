@@ -1,21 +1,11 @@
-import { mockData } from "../mocks/seedData";
+import { request } from "./http";
 import type { Building } from "../types/Building";
 
-const endpoint = "/api/building";
-
 export async function listBuilding(): Promise<Building[]> {
-  if (typeof fetch !== "undefined" && endpoint.startsWith("/api") && true) {
-    try {
-      const res = await fetch(endpoint);
-      if (res.ok) return await res.json();
-    } catch {
-      // Local mock fallback keeps the UI available during offline review.
-    }
-  }
-  return [...(mockData.building as unknown as Building[])];
+  return request<Building[]>("/building");
 }
 
-export async function saveBuilding(payload: Building) {
-  console.info("save Building", payload);
-  return payload;
+/** 合规总览：compliance_rate 由后端在设备状态变更/复核裁决后重算。 */
+export async function getBuildingOverview(): Promise<Building[]> {
+  return request<Building[]>("/building/overview");
 }

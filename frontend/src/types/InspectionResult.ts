@@ -7,4 +7,9 @@ export interface InspectionResult {
   measured_value: string;
   photo_url: string;
   note: string;
+  recorded_at: string;
+  source: "OFFLINE" | "ONLINE" | "REVIEW_OVERRIDE" | string;
+  valid: boolean;
+  invalid_reason?: string | null;
+  client_uuid?: string | null;
 }

@@ -1,54 +1,108 @@
-import React, { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
-import { routes } from "./router/routes";
-import { mockData } from "./mocks/seedData";
-import { StatusBadge } from "./components/common/StatusBadge";
-import { StatCard } from "./components/common/StatCard";
+import { routes, DEFAULT_ROUTE } from "./router/routes";
+import { useAuthStore } from "./api/auth";
+import { useConnectivity } from "./hooks/useConnectivity";
+import { useOfflineStore } from "./stores/OfflineStore";
+import { UserRole, UserRoleText } from "./constants/UserRole";
+import { DashboardPage } from "./pages/DashboardPage";
+import { DevicesPage } from "./pages/DevicesPage";
+import { TasksPage } from "./pages/TasksPage";
+import { HazardsPage } from "./pages/HazardsPage";
+import { ReportsPage } from "./pages/ReportsPage";
 import "./styles.css";
 
-function Page({ name }: { name: string }) {
-  const entities = Object.entries(mockData);
-  const total = useMemo(() => entities.reduce((sum, [, rows]) => sum + rows.length, 0), [entities]);
-  return <main className="page">
-    <section className="page-head">
-      <div>
-        <p className="eyebrow">fire-inspect</p>
-        <h1>{name}</h1>
+const DEMO_USERS: { id: number; role: UserRole }[] = [
+  { id: 1, role: UserRole.INSPECTOR },
+  { id: 3, role: UserRole.MAINTAINER },
+  { id: 4, role: UserRole.SUPERVISOR },
+  { id: 5, role: UserRole.AUDITOR },
+];
+
+function currentPath(): string {
+  const hash = window.location.hash.replace(/^#/, "");
+  return hash || DEFAULT_ROUTE;
+}
+
+function LoginBar() {
+  const { user, login, logout } = useAuthStore();
+  const online = useConnectivity();
+  const queued = useOfflineStore((s) => s.queued);
+
+  return (
+    <div className="topbar">
+      <div className={`net-state ${online ? "online" : "offline"}`}>
+        <span className="dot" />
+        {online ? `在线${queued.length ? `（待同步 ${queued.length}）` : ""}` : "离线：本机可继续填表"}
       </div>
-      <StatusBadge value="LOCAL_DATA" />
-    </section>
-    <section className="metrics">
-      <StatCard label="核心模型" value={entities.length} />
-      <StatCard label="本地记录" value={total} />
-      <StatCard label="共享枚举" value={3} />
-    </section>
-    <section className="workbench">
-      <div className="panel wide">
-        <h2>业务数据</h2>
-        <div className="table">
-          {entities.map(([key, rows]) => <article key={key} className="row">
-            <strong>{key}</strong><span>{rows.length} 条</span><StatusBadge value={Object.values(rows[0] ?? {})[1] as string ?? "READY"} />
-          </article>)}
-        </div>
+      <div className="login-box">
+        {user ? (
+          <>
+            <span className="user-chip">
+              {user.name} · {UserRoleText[user.role]}
+              {user.role === UserRole.AUDITOR && <em className="readonly-tag">只读</em>}
+            </span>
+            <button className="btn btn-ghost" onClick={logout}>退出</button>
+          </>
+        ) : (
+          <label>
+            演示登录：
+            <select value="" onChange={(e) => e.target.value && void login(Number(e.target.value))}>
+              <option value="">选择角色…</option>
+              {DEMO_USERS.map((u) => (
+                <option key={u.id} value={u.id}>
+                  {UserRoleText[u.role]}（用户 {u.id}）
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
       </div>
-      <div className="panel">
-        <h2>联动检查</h2>
-        <p>页面、store、API、构造器、日志模板和枚举常量均按提示词拆分，适合评审跨文件修改能力。</p>
-      </div>
-    </section>
-  </main>;
+    </div>
+  );
 }
 
 function App() {
-  const [active, setActive] = useState<string>(routes[0]?.route ?? "/dashboard");
-  const current = routes.find((route) => route.route === active) ?? routes[0];
-  return <div className="shell">
-    <aside>
-      <div className="brand">消防设施巡检维保平台</div>
-      <nav>{routes.map((route) => <button key={route.route} className={active === route.route ? "active" : ""} onClick={() => setActive(route.route)}>{route.name}</button>)}</nav>
-    </aside>
-    <Page name={current?.name ?? "工作台"} />
-  </div>;
+  const user = useAuthStore((s) => s.user);
+  const [path, setPath] = useState(currentPath());
+
+  useEffect(() => {
+    const onHash = () => setPath(currentPath());
+    window.addEventListener("hashchange", onHash);
+    return () => window.removeEventListener("hashchange", onHash);
+  }, []);
+
+  const visibleRoutes = routes.filter(
+    (r) => !user || r.roles.includes(user.role) || user.role === UserRole.AUDITOR,
+  );
+  const current = visibleRoutes.find((r) => r.route === path) ?? visibleRoutes[0] ?? routes[0];
+
+  return (
+    <div className="shell">
+      <aside>
+        <div className="brand">消防设施巡检维保平台</div>
+        <nav>
+          {visibleRoutes.map((route) => (
+            <a key={route.route} href={`#${route.route}`}
+              className={current.route === route.route ? "active" : ""}>
+              {route.name}
+            </a>
+          ))}
+        </nav>
+        {user?.role === UserRole.AUDITOR && (
+          <p className="nav-hint">审计员模式：全部页面只读，写操作由后端 403 拦截</p>
+        )}
+      </aside>
+      <div className="content">
+        <LoginBar />
+        {current.route === "/dashboard" && <DashboardPage />}
+        {current.route === "/devices" && <DevicesPage />}
+        {current.route === "/tasks" && <TasksPage />}
+        {current.route === "/hazards" && <HazardsPage />}
+        {current.route === "/reports" && <ReportsPage />}
+      </div>
+    </div>
+  );
 }
 
 createRoot(document.getElementById("root")!).render(<App />);

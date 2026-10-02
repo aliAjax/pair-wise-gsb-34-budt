@@ -1,21 +1,18 @@
-import { mockData } from "../mocks/seedData";
+import { request } from "./http";
 import type { HazardTicket } from "../types/HazardTicket";
 
-const endpoint = "/api/hazard-ticket";
-
-export async function listHazardTicket(): Promise<HazardTicket[]> {
-  if (typeof fetch !== "undefined" && endpoint.startsWith("/api") && true) {
-    try {
-      const res = await fetch(endpoint);
-      if (res.ok) return await res.json();
-    } catch {
-      // Local mock fallback keeps the UI available during offline review.
-    }
-  }
-  return [...(mockData.hazardTicket as unknown as HazardTicket[])];
+export async function listHazardTicket(status?: string): Promise<HazardTicket[]> {
+  const query = status ? `?status=${status}` : "";
+  return request<HazardTicket[]>(`/hazard-ticket${query}`);
 }
 
-export async function saveHazardTicket(payload: HazardTicket) {
-  console.info("save HazardTicket", payload);
-  return payload;
+/** 维保商/主管复验关闭；关闭后离线旧记录不得再覆盖现场。 */
+export async function closeHazardTicket(
+  ticketId: number,
+  rectifyNote: string,
+): Promise<HazardTicket> {
+  return request<HazardTicket>(`/hazard-ticket/${ticketId}/close`, {
+    method: "POST",
+    body: { rectify_note: rectifyNote },
+  });
 }

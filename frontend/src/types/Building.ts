@@ -6,4 +6,8 @@ export interface Building {
   fire_grade: string;
   manager_id: number;
   address_code: string;
+  compliance_rate?: number;
+  qualified_devices?: number;
+  rate_computed_at?: string;
+  pending_reviews?: number;
 }

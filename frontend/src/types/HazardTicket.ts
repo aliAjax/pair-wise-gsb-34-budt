@@ -6,5 +6,5 @@ export interface HazardTicket {
   deadline: string;
   rectify_status: string;
   rectify_note: string;
-  closed_at: string;
+  closed_at: string | null;
 }

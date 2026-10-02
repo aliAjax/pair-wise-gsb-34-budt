@@ -1,4 +1,9 @@
-from src.services.building_service import BuildingService
-service = BuildingService()
+from src.services.building_service import building_service
+
+
 def list_building():
-    return service.list()
+    return building_service.list()
+
+
+def building_overview():
+    return building_service.overview()
