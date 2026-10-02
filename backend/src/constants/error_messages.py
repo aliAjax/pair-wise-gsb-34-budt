@@ -1,1 +1,16 @@
-ERROR_MESSAGES = {"AUTH_REQUIRED": "missing token", "RBAC_DENIED": "role denied", "VALIDATION_FAILED": "invalid payload"}
+ERROR_MESSAGES = {
+    "AUTH_REQUIRED": "missing token",
+    "RBAC_DENIED": "role denied",
+    "VALIDATION_FAILED": "invalid payload",
+    "SYNC_BATCH_NOT_FOUND": "sync batch {batch_id} not found",
+    "SYNC_BATCH_FINISHED": "sync batch {batch_id} is already finished and cannot be retried",
+    "RESULT_NOT_FOUND": "inspection result {result_id} not found",
+    "TASK_NOT_FOUND": "inspection task {task_id} not found",
+    "DEVICE_NOT_FOUND": "fire device {device_id} not found",
+    "STALE_VERSION": "record {entity}#{record_id} version {base_version} is stale, server version is {server_version}",
+    "PROXY_FORBIDDEN": "proxy backfill by {actor_role} is forbidden; only the assigned inspector may submit",
+    "REVIEW_NOT_FOUND": "review item {review_id} not found",
+    "REVIEW_ALREADY_RESOLVED": "review item {review_id} is already resolved",
+    "REVIEW_DECISION_INVALID": "review decision must be KEEP_SERVER or TAKE_CLIENT",
+    "INTERNAL_ERROR": "internal server error",
+}

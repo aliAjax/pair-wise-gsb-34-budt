@@ -1,3 +1,5 @@
+import type { DeviceCompliance } from "./Compliance";
+
 export interface FireDevice {
   id: number;
   building_id: number;
@@ -8,4 +10,7 @@ export interface FireDevice {
   install_date: string;
   status: string;
   next_maintenance_at: string;
+  version: number;
+  updated_at?: string;
+  compliance?: DeviceCompliance;
 }

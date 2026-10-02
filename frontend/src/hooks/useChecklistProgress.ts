@@ -1,8 +1,16 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 
-export function useChecklistProgress<T>(rows: T[] = []) {
-  const [page, setPage] = useState(1);
-  const pageSize = 8;
-  const pageRows = useMemo(() => rows.slice((page - 1) * pageSize, page * pageSize), [rows, page]);
-  return { page, setPage, pageSize, pageRows, total: rows.length };
+export interface ChecklistItemLike {
+  item_code: string;
+  result_status?: string;
+}
+
+/** 巡检检查项完成度：已填判定（NORMAL/ABNORMAL）占比。 */
+export function useChecklistProgress(items: ChecklistItemLike[] = []) {
+  return useMemo(() => {
+    const total = items.length;
+    const done = items.filter((i) => i.result_status === "NORMAL" || i.result_status === "ABNORMAL").length;
+    const percent = total === 0 ? 0 : Math.round((done / total) * 100);
+    return { total, done, percent, allDone: total > 0 && done === total };
+  }, [items]);
 }

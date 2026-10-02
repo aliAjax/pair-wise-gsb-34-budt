@@ -1,4 +1,6 @@
 from pydantic import BaseModel
+
+
 class InspectionTask(BaseModel):
     id: int | float
     building_id: int | float
@@ -8,3 +10,4 @@ class InspectionTask(BaseModel):
     status: str
     checklist_version: str
     finished_at: str
+    version: int = 1

@@ -1,5 +1,10 @@
-import { StatusBadge } from "./StatusBadge";
+import type { FireDevice } from "../../types/FireDevice";
 
-export function DeviceLocationCell({ title = "DeviceLocationCell", value = "READY" }: { title?: string; value?: string }) {
-  return <div className="shared-widget"><strong>{title}</strong><StatusBadge value={value} /></div>;
+export function DeviceLocationCell({ device }: { device: Pick<FireDevice, "floor" | "location_desc" | "device_code"> }) {
+  return (
+    <div className="location-cell">
+      <strong>{device.device_code}</strong>
+      <span>{device.floor} · {device.location_desc}</span>
+    </div>
+  );
 }

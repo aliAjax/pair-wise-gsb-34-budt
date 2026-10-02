@@ -1,4 +1,6 @@
 from pydantic import BaseModel
+
+
 class FireDevice(BaseModel):
     id: int | float
     building_id: int | float
@@ -9,3 +11,5 @@ class FireDevice(BaseModel):
     install_date: str
     status: str
     next_maintenance_at: str
+    version: int = 1
+    updated_at: str = ""

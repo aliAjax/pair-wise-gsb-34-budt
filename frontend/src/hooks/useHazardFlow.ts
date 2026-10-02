@@ -1,8 +1,10 @@
-import { useMemo, useState } from "react";
+import { useHazardTicketStore } from "../stores/HazardTicketStore";
 
-export function useHazardFlow<T>(rows: T[] = []) {
-  const [page, setPage] = useState(1);
-  const pageSize = 8;
-  const pageRows = useMemo(() => rows.slice((page - 1) * pageSize, page * pageSize), [rows, page]);
-  return { page, setPage, pageSize, pageRows, total: rows.length };
+/** 隐患整改进度：开放/关闭统计与复验关闭动作。 */
+export function useHazardFlow() {
+  const rows = useHazardTicketStore((s) => s.rows);
+  const close = useHazardTicketStore((s) => s.close);
+  const open = rows.filter((t) => t.rectify_status !== "CLOSED");
+  const closed = rows.filter((t) => t.rectify_status === "CLOSED");
+  return { rows, open, closed, closeTicket: close };
 }

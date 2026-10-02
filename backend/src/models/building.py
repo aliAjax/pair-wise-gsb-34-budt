@@ -1,4 +1,6 @@
 from pydantic import BaseModel
+
+
 class Building(BaseModel):
     id: int | float
     name: str
@@ -7,3 +9,4 @@ class Building(BaseModel):
     fire_grade: str
     manager_id: int | float
     address_code: str
+    version: int = 1

@@ -2,13 +2,17 @@ import { create } from "zustand";
 import { listInspectionResult } from "../api/InspectionResult";
 import type { InspectionResult } from "../types/InspectionResult";
 
-type State = { rows: InspectionResult[]; loading: boolean; load: () => Promise<void> };
+type State = {
+  rows: InspectionResult[];
+  loading: boolean;
+  load: (deviceId?: number) => Promise<void>;
+};
 
 export const useInspectionResultStore = create<State>((set) => ({
   rows: [],
   loading: false,
-  async load() {
+  async load(deviceId) {
     set({ loading: true });
-    set({ rows: await listInspectionResult(), loading: false });
+    set({ rows: await listInspectionResult(deviceId), loading: false });
   }
 }));

@@ -1,0 +1,6 @@
+SyncItemStatus = ["PENDING", "MERGED", "CONFLICT", "REJECTED", "FAILED", "RESOLVED"]
+SyncBatchStatus = ["MERGING", "MERGED", "CONFLICT", "FAILED"]
+ReviewStatus = ["PENDING", "KEEP_SERVER", "TAKE_CLIENT"]
+RectifyStatus = ["OPEN", "RECTIFYING", "REVIEWING", "CLOSED"]
+DeviceStatus = ["NORMAL", "FAULT", "MAINTAINING", "SCRAPPED"]
+ResultStatus = ["NORMAL", "ABNORMAL"]

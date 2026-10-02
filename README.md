@@ -2,6 +2,18 @@
 
 面向园区和物业公司的消防设备巡检、隐患整改、维保计划和合规台账系统。
 
+## 本轮业务能力（离线同步 / 冲突复核 / RBAC）
+
+1. **地下室断网巡检**：巡检员在 `/tasks` 填写检查项，结果先写入本机离线队列（localStorage，按 `client_result_id` 幂等）；浏览器恢复联网后自动提交 `/api/sync/batches` 合并回消防设备台账。
+2. **主管改状态触发失效与重算**：`PATCH /api/fire-device/{id}/status`（仅物业主管）会把该设备历史有效巡检结果全部置为失效（`effective=false`、版本号 +1），并立即重算楼栋达标率；`/dashboard` 与 `/devices` 共用 `compliance_service` 同一份计算结果。
+3. **隐患已关闭不得被旧记录覆盖**：离线异常结果若对应设备的整改单已复验关闭，同步时生成 `HAZARD_CLOSED` 冲突，只保留冲突项进入复核，不修改设备、不覆盖结果；复核选择“采用巡检员记录”时另开新隐患单，旧关闭单原样保留。
+4. **部分失败可重试**：同步按条目独立落库，`MERGED` 立即生效、`FAILED` 保留在批次/本机，`POST /api/sync/batches/{id}/retry` 只重放失败项，已合并部分不重复入账。
+5. **RBAC**：JWT 登录（`/api/auth/login`），审计员 `AUDITOR` 全站只读（路由守卫 + 按钮隐藏 + 后端 `rbac_middleware` 三层拦截）；只有任务本人巡检员能提交结果，主管/维保商代补录整批返回 `403 PROXY_FORBIDDEN`；冲突复核仅物业主管可处置。
+6. **同一份复核结果**：设备台账页与合规总览页共用 `ReviewConflictPanel` 组件与 `GET /api/reviews` 数据。
+
+演示账号：`inspector/inspect123`（巡检员）、`maintainer/maintain123`（维保商）、`supervisor/super123`（物业主管）、`auditor/audit123`（审计员）。
+后端端到端校验：`cd backend && python3 check_scenarios.py`。
+
 ## 快速启动
 
 ```bash
@@ -57,6 +69,10 @@ backend/src/routes, controllers, services, models, repositories, middlewares, co
 - DeviceType: constants/DeviceType、types/DeviceType、constructors、logTemplates、errorMessages、筛选器、展示组件/控制器均有引用。
 - InspectionStatus: constants/InspectionStatus、types/InspectionStatus、constructors、logTemplates、errorMessages、筛选器、展示组件/控制器均有引用。
 - HazardSeverity: constants/HazardSeverity、types/HazardSeverity、constructors、logTemplates、errorMessages、筛选器、展示组件/控制器均有引用。
+- 本轮新增：
+  - 角色 `INSPECTOR/MAINTAINER/SUPERVISOR/AUDITOR`：后端 `constants/user_role.py`、`middlewares/rbac_middleware.py`、`routes/sync_routes.py`；前端 `constants/Role.ts`、`stores/AuthStore.ts`、`router/RouteGuard.tsx`、各页面按钮显隐。
+  - 同步/复核状态（`MERGED/CONFLICT/FAILED/RESOLVED`、`KEEP_SERVER/TAKE_CLIENT`、`DEVICE_STATUS_CHANGED/RESULT_SUPERSEDED/HAZARD_CLOSED`）：后端 `constants/sync_status.py`、`services/sync_service.py`、`services/review_service.py`、`constants/log_templates.py`、`constants/error_codes.py`、`constants/error_messages.py`、`constructors/sync_factory.py`、`database/init.sql`；前端 `constants/SyncStatus.ts`、`types/Sync.ts`、`api/Sync.ts`、`stores/SyncStore.ts`、`components/common/ReviewConflictPanel.tsx`。
+  - 设备状态 `NORMAL/FAULT/MAINTAINING/SCRAPPED`：达标率判定、主管改状态、冲突快照与 `database/init.sql`。
 
 ## 为什么会牵一发动全身
 

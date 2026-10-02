@@ -1,21 +1,20 @@
 import { mockData } from "../mocks/seedData";
 import type { HazardTicket } from "../types/HazardTicket";
+import { request } from "./request";
 
 const endpoint = "/api/hazard-ticket";
 
 export async function listHazardTicket(): Promise<HazardTicket[]> {
-  if (typeof fetch !== "undefined" && endpoint.startsWith("/api") && true) {
-    try {
-      const res = await fetch(endpoint);
-      if (res.ok) return await res.json();
-    } catch {
-      // Local mock fallback keeps the UI available during offline review.
-    }
+  try {
+    return await request<HazardTicket[]>(endpoint);
+  } catch {
+    return [...(mockData.hazardTicket as unknown as HazardTicket[])];
   }
-  return [...(mockData.hazardTicket as unknown as HazardTicket[])];
 }
 
-export async function saveHazardTicket(payload: HazardTicket) {
-  console.info("save HazardTicket", payload);
-  return payload;
+export async function closeHazardTicket(ticketId: number, rectifyNote: string): Promise<HazardTicket> {
+  return request<HazardTicket>(`${endpoint}/${ticketId}/close`, {
+    method: "POST",
+    body: JSON.stringify({ rectify_note: rectifyNote })
+  });
 }
